@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<title>Cinestar 360 Interactive Seat Map</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.css"/>
+
+<script
+src="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.js">
+</script>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f3f3f3;
+    overflow:hidden;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+    background:white;
+    padding:18px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.movie{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+}
+
+.poster{
+    width:90px;
+    border-radius:8px;
+}
+
+.movie-info h1{
+    margin:0;
+    font-size:34px;
+}
+
+.movie-info p{
+    margin:8px 0;
+    color:#555;
+    font-size:20px;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    display:flex;
+    height:calc(100vh - 140px);
+}
+
+/* ================= LEFT ================= */
+
+.left{
+    width:45%;
+    background:white;
+    overflow-y:auto;
+    padding:25px;
+    box-sizing:border-box;
+    padding-bottom:140px;
+}
+
+/* ================= SCREEN ================= */
+
+.screen-wrap{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.screen{
+    width:80%;
+    height:18px;
+    background:#7b1fa2;
+    border-radius:100px;
+    margin:0 auto 12px;
+}
+
+.screen-text{
+    font-size:30px;
+    font-weight:bold;
+}
+
+/* ================= SEATS ================= */
+
+.row{
+    display:flex;
+    justify-content:center;
+    margin-bottom:8px;
+}
+
+.seat{
+    width:48px;
+    height:48px;
+    margin:4px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:14px;
+    font-weight:bold;
+    transition:0.2s;
+}
+
+.available{
+    background:#ff9800;
+    cursor:pointer;
+}
+
+.available:hover{
+    transform:scale(1.08);
+    background:#ff5722;
+}
+
+.booked{
+    background:#9e9e9e;
+}
+
+/* ================= SELECTED ================= */
+
+.selected{
+    background:#9e9e9e !important;
+    border:3px solid #7b1fa2 !important;
+    box-shadow:0 0 15px rgba(123,31,162,0.8);
+}
+
+/* ================= LEGEND ================= */
+
+.legend{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    margin-top:30px;
+    font-size:20px;
+}
+
+.dot{
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:8px;
+}
+
+.orange{
+    background:#ff9800;
+}
+
+.gray{
+    background:#9e9e9e;
+}
+
+/* ================= RIGHT ================= */
+
+.right{
+    width:55%;
+    position:relative;
+    background:black;
+}
+
+#panorama{
+    width:100%;
+    height:100%;
+}
+
+.viewer-label{
+    position:absolute;
+    top:20px;
+    left:20px;
+    z-index:999;
+    background:rgba(0,0,0,0.6);
+    color:white;
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:20px;
+}
+
+/* ================= PAYMENT ================= */
+
+.payment-bar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:45%;
+    background:white;
+    padding:20px;
+    box-sizing:border-box;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,0.15);
+}
+
+.payment-info{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.pay-btn{
+    background:#7b1fa2;
+    color:white;
+    border:none;
+    padding:16px 40px;
+    border-radius:12px;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.pay-btn:hover{
+    transform:scale(1.05);
+    background:#9c27b0;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<div class="header">
+
+<div class="movie">
+
+<img class="poster"
+src="https://upload.wikimedia.org/wikipedia/en/7/7a/Avengers_Endgame_poster.jpg">
+
+<div class="movie-info">
+
+<h1>ĐẠI TIỆC TRĂNG MÁU 8 (T16)</h1>
+
+<p>📍 Cinestar Satra Quận 6 (TP.HCM) - Phòng: 03</p>
+
+<p>🕒 Suất chiếu: 13:30 - 14/05</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+<!-- ================= LEFT ================= -->
+
+<div class="left">
+
+<div class="screen-wrap">
+
+<div class="screen"></div>
+
+<div class="screen-text">MÀN HÌNH</div>
+
+</div>
+
+<!-- ================= SEATS ================= -->
+
+<script>
+
+const rows = {
+"A":11,
+"B":11,
+"C":11,
+"D":10,
+"G":13,
+"H":13,
+"J":13,
+"K":13,
+"L":13,
+"M":13,
+"N":12
+};
+
+const interactiveSeats = ["C05","J05","M01","M10"];
+
+document.write(generateSeats());
+
+function generateSeats(){
+
+    let html = "";
+
+    for(let row in rows){
+
+        html += `<div class="row">`;
+
+        for(let i=1;i<=rows[row];i++){
+
+            let num = String(i).padStart(2,'0');
+            let seatId = row + num;
+
+            if(interactiveSeats.includes(seatId)){
+
+                html += `
+                <button class="seat available"
+                id="${seatId}"
+                onclick="loadScene('${seatId}', event)">
+                ${seatId}
+                </button>
+                `;
+
+            }else{
+
+                html += `
+                <button class="seat booked">
+                ${seatId}
+                </button>
+                `;
+            }
+        }
+
+        html += `</div>`;
+    }
+
+    return html;
+}
+
+</script>
+
+<!-- ================= LEGEND ================= -->
+
+<div class="legend">
+
+<div>
+<span class="dot orange"></span>
+Còn trống
+</div>
+
+<div>
+<span class="dot gray"></span>
+Đã đặt
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= RIGHT ================= -->
+
+<div class="right">
+
+<div class="viewer-label">
+360° Preview Seat:
+<span id="seatLabel">M10</span>
+</div>
+
+<div id="panorama"></div>
+
+</div>
+
+</div>
+
+<!-- ================= PAYMENT ================= -->
+
+<div class="payment-bar">
+
+<div class="payment-info">
+Ghế đang chọn:
+<span id="selectedSeat">M10</span>
+</div>
+
+<button class="pay-btn">
+THANH TOÁN
+</button>
+
+</div>
+
+<!-- ================= PANNELLUM ================= -->
+
+<script>
+
+const viewer = pannellum.viewer('panorama', {
+
+"default": {
+    "firstScene": "M10",
+    "sceneFadeDuration": 1000,
+    "autoLoad": true
+},
+
+"scenes": {
+
+    /* ĐỔI NGƯỢC M1 - M10 */
+
+    "M01": {
+        "type": "equirectangular",
+        "panorama": "images360/M10.jpg"
+    },
+
+    "M10": {
+        "type": "equirectangular",
+        "panorama": "images360/M1.jpg"
+    },
+
+    "J05": {
+        "type": "equirectangular",
+        "panorama": "images360/J5.jpg"
+    },
+
+    "C05": {
+        "type": "equirectangular",
+        "panorama": "images360/C5.jpg"
+    }
+
+}
+
+});
+
+/* ================= LOAD SCENE ================= */
+
+function loadScene(scene, event){
+
+    viewer.loadScene(scene);
+
+    document.getElementById("seatLabel").innerText = scene;
+
+    document.getElementById("selectedSeat").innerText = scene;
+
+    /* RESET */
+
+    document.querySelectorAll('.seat.available').forEach(seat => {
+
+        seat.classList.remove("selected");
+
+    });
+
+    /* SELECTED */
+
+    event.target.classList.add("selected");
+
+}
+
+</script>
+
+</body>
+</html>
